@@ -5,61 +5,217 @@ import '../data/catalog.dart';
 import '../platform/device.dart';
 import '../widgets/common.dart';
 
-class HomeScreen extends StatelessWidget {
+/// The app's four parts, kept apart as in phyphox or Physics Toolbox:
+/// try sensors (المختبر), use them (رفيق), learn (الدليل), inspect the phone (جوالي).
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  int _tab = 0;
+  // Tabs are built on first visit only, so رفيق asks for the fingerprint when
+  // opened, not at app start; visited tabs keep their state.
+  final _visited = <int>{0};
+
+  static const _pages = <Widget>[LabScreen(), CompanionApp(), CatalogScreen(), PhoneScreen()];
+
+  @override
   Widget build(BuildContext context) {
-    final items = <(IconData, String, String, WidgetBuilder)>[
-      (Icons.menu_book, 'دليل الحساسات', '${catalog.length} حساسًا: ماذا يقيس كل حساس، وكيف يعمل، وما فوائده، مع تجربة بسيطة لكل منها',
-          (_) => const CatalogScreen()),
-      (Icons.apps, 'رفيق: التطبيق الشامل', 'تطبيق واحد يستخدم كل الحساسات: القبلة، والمسبحة، والنشاط، وبيئة القراءة، والميزان، والعدسة المكبّرة',
-          (_) => const CompanionApp()),
-      (Icons.phone_android, 'حساسات جوالي', 'قائمة بكل الحساسات الموجودة فعليًا في جوالك ومواصفاتها', (_) => const MySensorsScreen()),
-      (Icons.shield, 'الأمان والخصوصية', 'كيف يحمي هذا التطبيق بياناتك', (_) => const SecurityScreen()),
-    ];
     return Scaffold(
-      appBar: AppBar(title: const Text('حساسات الجوال')),
-      body: ListView(padding: const EdgeInsets.all(12), children: [
-        for (final (icon, title, sub, page) in items)
-          Card(
-            child: ListTile(
-              contentPadding: const EdgeInsets.all(12),
-              leading: Icon(icon, size: 40),
-              title: Text(title, style: Theme.of(context).textTheme.titleMedium),
-              subtitle: Text(sub),
-              trailing: const Icon(Icons.chevron_left),
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: page)),
-            ),
-          ),
-      ]),
+      body: IndexedStack(
+        index: _tab,
+        children: [
+          for (final (i, page) in _pages.indexed) _visited.contains(i) ? page : const SizedBox.shrink(),
+        ],
+      ),
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _tab,
+        onDestinationSelected: (i) => setState(() {
+          _tab = i;
+          _visited.add(i);
+        }),
+        destinations: const [
+          NavigationDestination(icon: Icon(Icons.science_outlined), selectedIcon: Icon(Icons.science), label: 'المختبر'),
+          NavigationDestination(icon: Icon(Icons.explore_outlined), selectedIcon: Icon(Icons.explore), label: 'رفيق'),
+          NavigationDestination(icon: Icon(Icons.menu_book_outlined), selectedIcon: Icon(Icons.menu_book), label: 'الدليل'),
+          NavigationDestination(icon: Icon(Icons.phone_android_outlined), selectedIcon: Icon(Icons.phone_android), label: 'جوالي'),
+        ],
+      ),
     );
   }
 }
 
-class CatalogScreen extends StatelessWidget {
+/// Which catalog sensors this phone has (null while unknown, e.g. GPS).
+Future<Map<String, bool?>> sensorAvailability() async {
+  List<SensorDescription> list;
+  try {
+    list = await Device.instance.sensors();
+  } catch (_) {
+    return {};
+  }
+  final types = {for (final s in list) s.type};
+  return {for (final s in catalog) s.id: s.androidType == null ? null : types.contains(s.androidType)};
+}
+
+class AvailabilityBadge extends StatelessWidget {
+  const AvailabilityBadge({super.key, required this.available});
+  final bool? available;
+
+  @override
+  Widget build(BuildContext context) {
+    return switch (available) {
+      true => const Tooltip(message: 'موجود في جوالك', child: Icon(Icons.check_circle, color: Colors.green, size: 20)),
+      false => const Tooltip(message: 'غير موجود في جوالك', child: Icon(Icons.cancel, color: Colors.grey, size: 20)),
+      null => const SizedBox(width: 20),
+    };
+  }
+}
+
+/// Every sensor as a tile: tap to try it, ⓘ to read about it.
+class LabScreen extends StatefulWidget {
+  const LabScreen({super.key});
+  @override
+  State<LabScreen> createState() => _LabScreenState();
+}
+
+class _LabScreenState extends State<LabScreen> {
+  late final Future<Map<String, bool?>> _available = sensorAvailability();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('المختبر: جرّب حساسات جوالك')),
+      body: FutureBuilder(
+        future: _available,
+        builder: (context, snap) {
+          final available = snap.data ?? const {};
+          return GridView.builder(
+            padding: const EdgeInsets.all(12),
+            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+              maxCrossAxisExtent: 220,
+              mainAxisExtent: 150,
+              crossAxisSpacing: 8,
+              mainAxisSpacing: 8,
+            ),
+            itemCount: catalog.length,
+            itemBuilder: (context, i) {
+              final s = catalog[i];
+              final missing = available[s.id] == false;
+              return Card(
+                clipBehavior: Clip.antiAlias,
+                child: InkWell(
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: s.demo)),
+                  child: Opacity(
+                    opacity: missing ? 0.5 : 1,
+                    child: Padding(
+                      padding: const EdgeInsets.all(10),
+                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                        Row(children: [
+                          Icon(s.icon, size: 32, color: Theme.of(context).colorScheme.primary),
+                          const Spacer(),
+                          AvailabilityBadge(available: available[s.id]),
+                          IconButton(
+                            tooltip: 'عن ${s.name}',
+                            visualDensity: VisualDensity.compact,
+                            icon: const Icon(Icons.info_outline, size: 20),
+                            onPressed: () => Navigator.push(
+                                context, MaterialPageRoute(builder: (_) => SensorDetailScreen(info: s))),
+                          ),
+                        ]),
+                        const Spacer(),
+                        Text(s.demoTitle, style: Theme.of(context).textTheme.titleSmall, maxLines: 1, overflow: TextOverflow.ellipsis),
+                        Text(s.name, style: Theme.of(context).textTheme.bodySmall, maxLines: 2, overflow: TextOverflow.ellipsis),
+                      ]),
+                    ),
+                  ),
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+}
+
+/// The phone's own sensors and the app's privacy promises.
+class PhoneScreen extends StatelessWidget {
+  const PhoneScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('جوالي'),
+          bottom: const TabBar(tabs: [Tab(text: 'حساسات جوالي'), Tab(text: 'الخصوصية والأمان')]),
+        ),
+        body: const TabBarView(children: [MySensorsScreen(embedded: true), SecurityScreen(embedded: true)]),
+      ),
+    );
+  }
+}
+
+class CatalogScreen extends StatefulWidget {
   const CatalogScreen({super.key});
+  @override
+  State<CatalogScreen> createState() => _CatalogScreenState();
+}
+
+class _CatalogScreenState extends State<CatalogScreen> {
+  late final Future<Map<String, bool?>> _available = sensorAvailability();
+  String _query = '';
+
+  bool _matches(SensorInfo s) {
+    final q = _query.trim().toLowerCase();
+    if (q.isEmpty) return true;
+    return [s.name, s.english, s.measures, ...s.benefits, ...s.examples].any((t) => t.toLowerCase().contains(q));
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('دليل الحساسات')),
-      body: ListView(children: [
-        for (final g in SensorGroup.values) ...[
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
-            child: Text(groupName(g), style: Theme.of(context).textTheme.titleMedium),
-          ),
-          for (final s in catalog.where((s) => s.group == g))
-            ListTile(
-              leading: Icon(s.icon),
-              title: Text(s.name),
-              subtitle: Text(s.english),
-              trailing: s.virtual ? const Chip(label: Text('برمجي')) : null,
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => SensorDetailScreen(info: s))),
+      body: FutureBuilder(
+        future: _available,
+        builder: (context, snap) {
+          final available = snap.data ?? const {};
+          final shown = catalog.where(_matches).toList();
+          return ListView(children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+              child: TextField(
+                decoration: const InputDecoration(
+                  prefixIcon: Icon(Icons.search),
+                  hintText: 'ابحث: بوصلة، خطوات، ضوء، Gyroscope…',
+                  border: OutlineInputBorder(),
+                ),
+                onChanged: (v) => setState(() => _query = v),
+              ),
             ),
-        ],
-      ]),
+            if (shown.isEmpty) const Padding(padding: EdgeInsets.all(24), child: Text('لا توجد نتائج.')),
+            for (final g in SensorGroup.values)
+              if (shown.any((s) => s.group == g)) ...[
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
+                  child: Text(groupName(g), style: Theme.of(context).textTheme.titleMedium),
+                ),
+                for (final s in shown.where((s) => s.group == g))
+                  ListTile(
+                    leading: Icon(s.icon),
+                    title: Text(s.name),
+                    subtitle: Text(s.english + (s.virtual ? ' · برمجي' : '')),
+                    trailing: AvailabilityBadge(available: available[s.id]),
+                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => SensorDetailScreen(info: s))),
+                  ),
+              ],
+          ]);
+        },
+      ),
     );
   }
 }
@@ -114,12 +270,13 @@ class SensorDetailScreen extends StatelessWidget {
 }
 
 class MySensorsScreen extends StatelessWidget {
-  const MySensorsScreen({super.key});
+  const MySensorsScreen({super.key, this.embedded = false});
+  final bool embedded;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('حساسات جوالي')),
+      appBar: embedded ? null : AppBar(title: const Text('حساسات جوالي')),
       body: FutureBuilder<List<SensorDescription>>(
         future: Device.instance.sensors(),
         builder: (context, snap) {
@@ -152,7 +309,8 @@ class MySensorsScreen extends StatelessWidget {
 }
 
 class SecurityScreen extends StatelessWidget {
-  const SecurityScreen({super.key});
+  const SecurityScreen({super.key, this.embedded = false});
+  final bool embedded;
 
   static const points = [
     ('لا إنترنت إطلاقًا', 'التطبيق لا يملك إذن الإنترنت، فلا يمكنه إرسال أي قراءة خارج جوالك حتى لو أراد.'),
@@ -169,7 +327,7 @@ class SecurityScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('الأمان والخصوصية')),
+      appBar: embedded ? null : AppBar(title: const Text('الأمان والخصوصية')),
       body: ListView(padding: const EdgeInsets.all(12), children: [
         for (final (title, body) in points)
           Card(child: ListTile(leading: const Icon(Icons.verified_user), title: Text(title), subtitle: Text(body))),

@@ -190,6 +190,7 @@ class _QiblaBodyState extends State<_QiblaBody> with Listens {
   LocationFix? _fix;
   double _declination = 0;
   double? _heading;
+  int _accuracy = 3;
   bool _wasFacing = false;
 
   @override
@@ -204,8 +205,10 @@ class _QiblaBodyState extends State<_QiblaBody> with Listens {
         }, onError: (_) {});
       }
     });
-    listen('rot', Device.instance.sensor(SensorType.rotationVector, rate: SensorRate.game),
-        (v) => _heading = _smooth.add(azimuthFromRotationVector(v)));
+    listen('rot', Device.instance.sensor(SensorType.rotationVector, rate: SensorRate.game), (v) {
+      _heading = _smooth.add(azimuthFromRotationVector(v));
+      _accuracy = v.last.round();
+    });
   }
 
   @override
@@ -232,6 +235,8 @@ class _QiblaBodyState extends State<_QiblaBody> with Listens {
       Text('اتجاه القبلة من موقعك: ${qibla.toStringAsFixed(1)}° من الشمال الحقيقي'),
       Text('المسافة إلى مكة: ${distanceKm(f.lat, f.lon, kaabaLat, kaabaLon).toStringAsFixed(0)} كم'),
       Text('الانحراف المغناطيسي هنا: ${_declination.toStringAsFixed(1)}°'),
+      const SizedBox(height: 8),
+      CalibrationHint(accuracy: _accuracy),
     ]);
   }
 }

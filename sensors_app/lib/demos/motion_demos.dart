@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import '../logic/sensor_math.dart';
 import '../platform/device.dart';
 import '../widgets/common.dart';
+import '../widgets/live_chart.dart';
 
 /// Accelerometer: live x/y/z and a shake counter.
 class AccelerometerDemo extends StatefulWidget {
@@ -48,6 +49,7 @@ class _AccelerometerDemoState extends State<AccelerometerDemo> with Listens {
                   Reading(label: 'عدد الهزّات', value: '$_shakes'),
                   TextButton(onPressed: () => setState(() => _shakes = 0), child: const Text('تصفير')),
                 ])),
+      LiveChart(stream: Device.instance.sensor(SensorType.accelerometer, rate: SensorRate.game), labels: const ['X', 'Y', 'Z'], unit: 'm/s²'),
     ]);
   }
 }
@@ -91,6 +93,7 @@ class _GyroscopeDemoState extends State<GyroscopeDemo> with Listens {
                   Reading(label: 'زاوية الدوران حول Z', value: normalizeDegrees(_angle * 180 / math.pi).toStringAsFixed(0), unit: '°'),
                   TextButton(onPressed: () => setState(() => _angle = 0), child: const Text('تصفير')),
                 ])),
+      LiveChart(stream: Device.instance.sensor(SensorType.gyroscope, rate: SensorRate.game), labels: const ['X', 'Y', 'Z'], unit: 'rad/s'),
     ]);
   }
 }
@@ -120,6 +123,7 @@ class MagnetometerDemo extends StatelessWidget {
           ]);
         },
       ),
+      LiveChart(stream: Device.instance.sensor(SensorType.magneticField), labels: const ['X', 'Y', 'Z'], unit: 'µT', digits: 1),
     ]);
   }
 }
@@ -134,12 +138,15 @@ class CompassDemo extends StatefulWidget {
 class _CompassDemoState extends State<CompassDemo> with Listens {
   final _smooth = AngleSmoother();
   double? _heading;
+  int _accuracy = 3;
 
   @override
   void initState() {
     super.initState();
-    listen('r', Device.instance.sensor(SensorType.rotationVector, rate: SensorRate.game),
-        (v) => _heading = _smooth.add(azimuthFromRotationVector(v)));
+    listen('r', Device.instance.sensor(SensorType.rotationVector, rate: SensorRate.game), (v) {
+      _heading = _smooth.add(azimuthFromRotationVector(v));
+      _accuracy = v.last.round();
+    });
   }
 
   @override
@@ -156,6 +163,8 @@ class _CompassDemoState extends State<CompassDemo> with Listens {
                   CompassDial(heading: h),
                   const SizedBox(height: 12),
                   Reading(label: 'الاتجاه (من الشمال المغناطيسي)', value: h.toStringAsFixed(0), unit: '°'),
+                  const SizedBox(height: 8),
+                  CalibrationHint(accuracy: _accuracy),
                 ])),
     ]);
   }
@@ -223,6 +232,7 @@ class LevelDemo extends StatelessWidget {
         stream: Device.instance.sensor(SensorType.gravity, rate: SensorRate.game),
         builder: (context, g) => BubbleLevel(gravity: g),
       ),
+      LiveChart(stream: Device.instance.sensor(SensorType.gravity, rate: SensorRate.game), labels: const ['X', 'Y', 'Z'], unit: 'm/s²'),
     ]);
   }
 }
@@ -308,6 +318,7 @@ class _LinearAccelerationDemoState extends State<LinearAccelerationDemo> with Li
                   const SizedBox(height: 8),
                   Text(activityLabel(activityFrom(_avg)), style: Theme.of(context).textTheme.headlineSmall),
                 ])),
+      LiveChart(stream: Device.instance.sensor(SensorType.linearAcceleration, rate: SensorRate.game), labels: const ['X', 'Y', 'Z'], unit: 'm/s²'),
     ]);
   }
 }

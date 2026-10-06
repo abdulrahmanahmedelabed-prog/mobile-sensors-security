@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../logic/sensor_math.dart';
 import '../platform/device.dart';
 import '../widgets/common.dart';
+import '../widgets/live_chart.dart';
 
 /// Light sensor: lux meter with a reading-comfort hint.
 class LightDemo extends StatelessWidget {
@@ -25,6 +26,7 @@ class LightDemo extends StatelessWidget {
           Text(v[0] < 50 ? 'الإضاءة ضعيفة للقراءة: أشعل ضوءًا لراحة عينيك.' : 'الإضاءة مناسبة للقراءة.'),
         ]),
       ),
+      LiveChart(stream: Device.instance.sensor(SensorType.light), labels: const ['lux'], digits: 0),
     ]);
   }
 }
@@ -74,6 +76,7 @@ class _ProximityDemoState extends State<ProximityDemo> with Listens {
                   Reading(label: 'العدد', value: '$_count'),
                   TextButton(onPressed: () => setState(() => _count = 0), child: const Text('تصفير')),
                 ])),
+      LiveChart(stream: Device.instance.sensor(SensorType.proximity), labels: const ['cm'], digits: 1),
     ]);
   }
 }
@@ -120,6 +123,7 @@ class _PressureDemoState extends State<PressureDemo> with Listens {
                     TextButton(onPressed: () => setState(() => _startAlt = alt), child: const Text('تصفير')),
                   ]);
                 })),
+      LiveChart(stream: Device.instance.sensor(SensorType.pressure), labels: const ['hPa'], digits: 2),
     ]);
   }
 }
@@ -142,6 +146,7 @@ class SimpleValueDemo extends StatelessWidget {
         stream: Device.instance.sensor(type, rate: SensorRate.normal),
         builder: (context, v) => Reading(label: label, value: v[0].toStringAsFixed(1), unit: unit),
       ),
+      LiveChart(stream: Device.instance.sensor(type, rate: SensorRate.normal), labels: [unit], digits: 1),
     ]);
   }
 }

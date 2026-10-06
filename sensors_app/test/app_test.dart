@@ -57,14 +57,40 @@ void main() {
         Feature.level, Feature.magnifier, Feature.lock]));
   });
 
-  testWidgets('home lists the four sections', (tester) async {
+  testWidgets('four tabs: lab, companion, guide, phone', (tester) async {
     fakeDevice(tester);
     await tester.pumpWidget(const SensorsLabApp());
     await tester.pumpAndSettle();
-    expect(find.text('دليل الحساسات'), findsOneWidget);
-    expect(find.text('رفيق: التطبيق الشامل'), findsOneWidget);
+    for (final label in ['المختبر', 'رفيق', 'الدليل', 'جوالي']) {
+      expect(find.text(label), findsOneWidget);
+    }
+    // Lab: every sensor is a tile; the phone has a light sensor but no barometer.
+    expect(find.text('مقياس الإضاءة'), findsOneWidget);
+    await tester.tap(find.text('مقياس الإضاءة'));
+    await tester.pumpAndSettle();
+    expect(find.byType(LightDemo), findsOneWidget);
+    expect(find.text('الرسم البياني (آخر 10 ثوانٍ)'), findsOneWidget);
+    await tester.tap(find.byType(BackButton)); // pageBack() looks for the English tooltip
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('الدليل'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField), 'بوصلة');
+    await tester.pumpAndSettle();
+    expect(find.text('متجه الدوران (البوصلة الذكية)'), findsOneWidget);
+    expect(find.text('حساس القرب'), findsNothing);
+
+    await tester.tap(find.text('جوالي'));
+    await tester.pumpAndSettle();
     expect(find.text('حساسات جوالي'), findsOneWidget);
-    expect(find.text('الأمان والخصوصية'), findsOneWidget);
+    await tester.tap(find.text('الخصوصية والأمان'));
+    await tester.pumpAndSettle();
+    expect(find.text('لا إنترنت إطلاقًا'), findsOneWidget);
+
+    // رفيق is locked until the fingerprint check passes.
+    await tester.tap(find.text('رفيق'));
+    await tester.pumpAndSettle();
+    expect(find.text('«رفيق» مقفل ببصمتك (حساس البصمة).'), findsOneWidget);
   });
 
   testWidgets('sensor detail opens its demo', (tester) async {

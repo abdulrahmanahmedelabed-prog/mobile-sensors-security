@@ -262,3 +262,24 @@ mixin Listens<W extends StatefulWidget> on State<W> {
     super.dispose();
   }
 }
+
+
+/// Compass calibration from a sensor event's accuracy (SensorManager.SENSOR_STATUS_*).
+class CalibrationHint extends StatelessWidget {
+  const CalibrationHint({super.key, required this.accuracy});
+  final int accuracy;
+
+  @override
+  Widget build(BuildContext context) {
+    final (label, color, icon) = switch (accuracy) {
+      3 => ('المعايرة: عالية ✔', Colors.green, Icons.check_circle),
+      2 => ('المعايرة: متوسطة', Colors.amber.shade800, Icons.info),
+      _ => ('المعايرة: ضعيفة — حرّك الجوال في الهواء على شكل رقم 8 عدة مرات، وابتعد عن المعادن', Colors.red, Icons.warning),
+    };
+    return Row(mainAxisSize: MainAxisSize.min, children: [
+      Icon(icon, color: color, size: 18),
+      const SizedBox(width: 6),
+      Flexible(child: Text(label, style: TextStyle(color: color))),
+    ]);
+  }
+}

@@ -8,6 +8,7 @@ import 'package:local_auth/local_auth.dart';
 import '../logic/sensor_math.dart';
 import '../platform/device.dart';
 import '../widgets/common.dart';
+import '../widgets/live_chart.dart';
 
 /// Step counter: steps since the page opened.
 class StepsDemo extends StatelessWidget {
@@ -102,19 +103,22 @@ class MicrophoneDemo extends StatelessWidget {
       PermissionGate(
         permission: AppPermission.microphone,
         reason: 'لقياس مستوى الضوضاء حولك.',
-        child: LiveValue<double>(
-          stream: Device.instance.soundLevel(),
-          builder: (context, dbfs) {
-            final db = approxDb(dbfs);
-            return Column(children: [
-              Reading(label: 'مستوى الصوت (تقريبي)', value: db.toStringAsFixed(0), unit: 'dB'),
-              const SizedBox(height: 8),
-              Meter(value: db, min: 20, max: 100, color: db > 80 ? Colors.red : null),
-              const SizedBox(height: 8),
-              Text(noiseLabel(db), style: Theme.of(context).textTheme.titleLarge),
-            ]);
-          },
-        ),
+        child: Column(children: [
+          LiveValue<double>(
+            stream: Device.instance.soundLevel(),
+            builder: (context, dbfs) {
+              final db = approxDb(dbfs);
+              return Column(children: [
+                Reading(label: 'مستوى الصوت (تقريبي)', value: db.toStringAsFixed(0), unit: 'dB'),
+                const SizedBox(height: 8),
+                Meter(value: db, min: 20, max: 100, color: db > 80 ? Colors.red : null),
+                const SizedBox(height: 8),
+                Text(noiseLabel(db), style: Theme.of(context).textTheme.titleLarge),
+              ]);
+            },
+          ),
+          LiveChart(stream: Device.instance.soundLevel().map((d) => [approxDb(d)]), labels: const ['dB'], digits: 0),
+        ]),
       ),
     ]);
   }
