@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mvscan"
+version = "1.0.0"
+description = "Static vulnerability scanner for Android, iOS, Flutter and React Native apps"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.scripts]
+mvscan = "mvscan.cli:main"
+
+[tool.setuptools]
+packages = ["mvscan"]
