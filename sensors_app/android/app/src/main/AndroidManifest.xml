@@ -11,6 +11,8 @@
     <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION"/>
     <!-- Added by the camera plugin for saving videos on old Android; not used here. -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" tools:node="remove"/>
+    <!-- Implied by the line above in the merged manifest; photos stay in memory. -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" tools:node="remove"/>
 
     <!-- The app still installs on phones lacking any of these; each demo says
          when a sensor is missing. -->

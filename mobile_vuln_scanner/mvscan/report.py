@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import html
 import json
+import os
 from datetime import datetime, timezone
 
 from . import __version__
@@ -95,3 +96,54 @@ table{{width:100%;border-collapse:collapse;background:#fff}}th,td{{border:1px so
 .sev{{color:#fff;border-radius:6px;padding:2px 8px;white-space:nowrap}}.meta{{color:#64748b;font-size:12px}}
 .ev code,.loc code{{direction:ltr;unicode-bidi:embed;word-break:break-all;font-size:12px}}.ev{{margin:4px 0;background:#f1f5f9;padding:4px}}
 </style></head><body><h1>تقرير فحص ثغرات تطبيقات الجوال (mvscan {e(__version__)})</h1>{''.join(parts)}</body></html>"""
+
+
+_SARIF_LEVEL = {Severity.CRITICAL: "error", Severity.HIGH: "error", Severity.MEDIUM: "warning",
+                Severity.LOW: "note", Severity.INFO: "note"}
+_SARIF_SCORE = {Severity.CRITICAL: "9.5", Severity.HIGH: "7.5", Severity.MEDIUM: "5.0",
+                Severity.LOW: "3.0", Severity.INFO: "0.0"}
+
+
+def to_sarif(results: list[ScanResult], min_severity: Severity = Severity.INFO, base: str = "") -> str:
+    """SARIF 2.1.0, for GitHub code scanning (Security tab) and other tools.
+
+    Locations are made relative to `base` (the repository root) when given.
+    """
+    rules: dict[str, dict] = {}
+    out = []
+    for r in results:
+        prefix = ""
+        if base:
+            rel = os.path.relpath(r.target, base)
+            prefix = "" if rel == "." else rel.replace(os.sep, "/") + "/"
+        for f in r.sorted_findings():
+            if f.severity < min_severity:
+                continue
+            rule = rules.setdefault(f.rule_id, {
+                "id": f.rule_id,
+                "name": f.rule_id.replace("-", ""),
+                "shortDescription": {"text": f.title},
+                "help": {"text": f.recommendation or f.title},
+                "properties": {"tags": ["security", "mobile"] + ([f.cwe] if f.cwe else []),
+                               "security-severity": _SARIF_SCORE[f.severity]},
+            })
+            # Keep the highest severity seen for a rule.
+            if float(_SARIF_SCORE[f.severity]) > float(rule["properties"]["security-severity"]):
+                rule["properties"]["security-severity"] = _SARIF_SCORE[f.severity]
+            uri = f.location if r.kind != "project" else prefix + f.location
+            location = {"physicalLocation": {"artifactLocation": {"uri": uri.split("!", 1)[0] if r.kind != "project" else uri}}}
+            if f.line:
+                location["physicalLocation"]["region"] = {"startLine": f.line}
+            message = f.title + (f" — {f.evidence}" if f.evidence else "") + (f"\n{f.recommendation}" if f.recommendation else "")
+            out.append({"ruleId": f.rule_id, "level": _SARIF_LEVEL[f.severity], "message": {"text": message},
+                        "locations": [location]})
+    return json.dumps({
+        "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+        "version": "2.1.0",
+        "runs": [{
+            "tool": {"driver": {"name": "mvscan", "version": __version__,
+                                "informationUri": "https://github.com/abdulrahmanahmedelabed-prog/mobile-sensors-security",
+                                "rules": list(rules.values())}},
+            "results": out,
+        }],
+    }, ensure_ascii=False, indent=2)

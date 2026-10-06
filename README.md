@@ -4,19 +4,19 @@
 
 1. **دليل حساسات الجوال**: 16 حساسًا، ولكل حساس شرح لما يقيسه وكيف يعمل وما فوائده، مع **تطبيق بسيط** لتجربته.
 2. **«رفيق»: تطبيق شامل يستخدم جميع الحساسات**، ويوضّح أي حساس يُستخدم وفي أي جزء من التطبيق.
-3. **mvscan: كاشف الثغرات البرمجية** في تطبيقات الجوال، سواء من كودها المصدري أو من ملفات APK/IPA،
-   أو مباشرة من التطبيقات المثبتة في جوالك.
+3. **كاشف الثغرات البرمجية** في تطبيقات الجوال، بنسختين:
+   - **فاحص التطبيقات**: تطبيق أندرويد يفحص تطبيقات جوالك المثبتة **من الجوال نفسه**، ويعطي كل تطبيق درجة أمان من 100.
+   - **mvscan**: أداة للكمبيوتر تفحص الكود المصدري وملفات APK/IPA، والتطبيقات المثبتة عبر USB.
 
 البرنامج مكتوب مع مراعاة الأمان (راجع [الأمان في تطبيق الحساسات](#الأمان-في-تطبيق-الحساسات))، ويُفحص كل
 تعديل عليه آليًا بأداة الثغرات نفسها قبل بنائه.
 
 ## التحميل (أندرويد 10 فأحدث)
 
-| الجهاز | الملف |
-|---|---|
-| 📱 أغلب الجوالات | **[sensors-lab-arm64.apk](../../releases/download/app-latest/sensors-lab-arm64.apk)** |
-| 📱 الجوالات القديمة (32-بت) | [sensors-lab-armv7-old-phones.apk](../../releases/download/app-latest/sensors-lab-armv7-old-phones.apk) |
-| 🛡️ تقرير فحص الـ APK بأداة mvscan | [mvscan-apk-report.html](../../releases/download/app-latest/mvscan-apk-report.html) |
+| التطبيق | أغلب الجوالات | الجوالات القديمة (32-بت) | تقرير فحصه بأداة mvscan |
+|---|---|---|---|
+| 📡 **حساسات الجوال** (الدليل + «رفيق») | **[sensors-lab-arm64.apk](../../releases/download/app-latest/sensors-lab-arm64.apk)** | [armv7](../../releases/download/app-latest/sensors-lab-armv7-old-phones.apk) | [التقرير](../../releases/download/app-latest/sensors-lab-mvscan-report.html) |
+| 🛡️ **فاحص التطبيقات** (يفحص تطبيقات جوالك) | **[app-scanner-arm64.apk](../../releases/download/app-latest/app-scanner-arm64.apk)** | [armv7](../../releases/download/app-latest/app-scanner-armv7-old-phones.apk) | [التقرير](../../releases/download/app-latest/app-scanner-mvscan-report.html) |
 
 الملفات تُبنى تلقائيًا بعد كل تعديل على الفرع `main` (من [GitHub Actions](../../actions)).
 افتح الرابط من متصفح الجوال، ثم ثبّت الملف، واسمح بـ«التثبيت من هذا المصدر» إذا طُلب منك.

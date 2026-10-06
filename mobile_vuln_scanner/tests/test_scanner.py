@@ -282,3 +282,16 @@ def test_adb_rejects_bad_package_names():
         adb.apk_paths("com.x; rm -rf /")
     assert adb.APK_PATH_RE.match("/data/app/~~abc==/com.x-1/base.apk")
     assert not adb.APK_PATH_RE.match("/data/app/x.apk; reboot")
+
+
+def test_sarif_report(tmp_path):
+    proj = tmp_path / "app"
+    write(proj, "src/a.dart", "final u = 'http://x.bad.com/';")
+    data = json.loads(report.to_sarif([scan(str(proj))], base=str(tmp_path)))
+    run = data["runs"][0]
+    assert data["version"] == "2.1.0"
+    assert run["tool"]["driver"]["rules"][0]["id"] == "MV-NET-001"
+    loc = run["results"][0]["locations"][0]["physicalLocation"]
+    assert loc["artifactLocation"]["uri"] == "app/src/a.dart"
+    assert loc["region"]["startLine"] == 1
+    assert run["results"][0]["level"] == "warning"

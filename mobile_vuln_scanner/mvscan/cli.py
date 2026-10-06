@@ -21,7 +21,8 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--adb", action="store_true", help="افحص التطبيقات المثبتة في جوال متصل عبر USB")
     p.add_argument("--package", action="append", default=[], help="مع --adb: اسم حزمة محددة (يتكرر)")
     p.add_argument("--include-system", action="store_true", help="مع --adb: يشمل تطبيقات النظام")
-    p.add_argument("--format", choices=("text", "json", "html"), default="text")
+    p.add_argument("--format", choices=("text", "json", "html", "sarif"), default="text")
+    p.add_argument("--sarif-base", default="", help="مع sarif: جذر المستودع لجعل المسارات نسبية إليه")
     p.add_argument("-o", "--output", help="اكتب التقرير في ملف بدل الشاشة")
     p.add_argument("--min-severity", default="info", help="أقل خطورة تُعرض: info/low/medium/high/critical")
     p.add_argument("--fail-on", default=None,
@@ -69,8 +70,11 @@ def main(argv: list[str] | None = None) -> int:
             print(e, file=sys.stderr)
             return 2
 
-    render = {"text": report.to_text, "json": report.to_json, "html": report.to_html}[args.format]
-    out = render(results, min_sev)
+    if args.format == "sarif":
+        out = report.to_sarif(results, min_sev, args.sarif_base)
+    else:
+        render = {"text": report.to_text, "json": report.to_json, "html": report.to_html}[args.format]
+        out = render(results, min_sev)
     if args.output:
         Path(args.output).write_text(out, encoding="utf-8")
         print(f"كُتب التقرير في {args.output}", file=sys.stderr)
