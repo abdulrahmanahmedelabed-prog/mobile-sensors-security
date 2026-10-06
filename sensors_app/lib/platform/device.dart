@@ -85,6 +85,11 @@ class LocationFix {
 
 /// Readings and permissions from the phone. Streams are shared, so several
 /// widgets can watch one sensor while the native side registers it once.
+///
+/// They are kept as the broadcast streams EventChannel returns (only mapped):
+/// those start the native sensor when the first listener arrives and stop it
+/// when the last one leaves, any number of times. (asBroadcastStream would
+/// not: once its last listener left, a page opened again got no readings.)
 class Device {
   Device._();
   static final instance = Device._();
@@ -96,24 +101,23 @@ class Device {
   List<SensorDescription>? _sensors;
 
   Stream<List<double>> sensor(int type, {SensorRate rate = SensorRate.ui}) {
-    return _sensorStreams.putIfAbsent('$type/${rate.code}', () {
+    // One stream per sensor: the native side has one listener per channel,
+    // so the rate of the first request wins while it is being watched.
+    return _sensorStreams.putIfAbsent('$type', () {
       return EventChannel('sensors_lab/sensor/$type')
           .receiveBroadcastStream({'rate': rate.code})
-          .map((e) => [for (final v in e as List<Object?>) (v as num).toDouble()])
-          .asBroadcastStream(onCancel: (s) => s.cancel());
+          .map((e) => [for (final v in e as List<Object?>) (v as num).toDouble()]);
     });
   }
 
   Stream<LocationFix> location() => _location ??= const EventChannel('sensors_lab/location')
       .receiveBroadcastStream()
-      .map((e) => LocationFix.fromMap(e as Map<Object?, Object?>))
-      .asBroadcastStream(onCancel: (s) => s.cancel());
+      .map((e) => LocationFix.fromMap(e as Map<Object?, Object?>));
 
   /// Loudness in dBFS (-90 silence … 0 loudest) every ~100 ms.
   Stream<double> soundLevel() => _sound ??= const EventChannel('sensors_lab/sound')
       .receiveBroadcastStream()
-      .map((e) => (e as num).toDouble())
-      .asBroadcastStream(onCancel: (s) => s.cancel());
+      .map((e) => (e as num).toDouble());
 
   Future<List<SensorDescription>> sensors() async {
     final list = await _method.invokeListMethod<Object?>('sensors') ?? const [];

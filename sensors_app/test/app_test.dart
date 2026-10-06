@@ -79,6 +79,19 @@ void main() {
     expect(find.text('إضاءة خافتة'), findsOneWidget);
   });
 
+  testWidgets('a sensor page works again after it was closed', (tester) async {
+    fakeDevice(tester);
+    await pump(tester, SensorDetailScreen(info: sensorById('light')));
+    for (var i = 0; i < 3; i++) {
+      await tester.scrollUntilVisible(find.byType(FilledButton), 200);
+      await tester.tap(find.byType(FilledButton));
+      await tester.pumpAndSettle();
+      expect(find.text('25 lux', findRichText: true), findsOneWidget, reason: 'visit ${i + 1}');
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+    }
+  });
+
   testWidgets('missing sensor shows a message instead of crashing', (tester) async {
     fakeDevice(tester);
     await pump(tester, const ActivityPage());
