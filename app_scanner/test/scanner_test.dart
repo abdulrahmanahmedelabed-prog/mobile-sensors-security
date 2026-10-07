@@ -170,6 +170,12 @@ void main() {
       expect(f.firstWhere((x) => x.id == 'AS-EXP').details, ['receiver: Rx']);
     });
 
+    test('years read correctly in Arabic', () {
+      expect(arabicYears(2), 'سنتين');
+      expect(arabicYears(4), '4 سنوات');
+      expect(arabicYears(12), '12 سنة');
+    });
+
     test('not updated for years', () {
       expect(ids(app(lastUpdate: DateTime(2021).millisecondsSinceEpoch)), contains('AS-OLD'));
     });

@@ -58,6 +58,14 @@ const personalPermissions = {
 
 String _short(String name) => name.split('.').last;
 
+/// "سنة"، "سنتين"، "3 سنوات"، "11 سنة" — Arabic number agreement.
+String arabicYears(int n) {
+  if (n == 1) return 'سنة';
+  if (n == 2) return 'سنتين';
+  if (n >= 3 && n <= 10) return '$n سنوات';
+  return '$n سنة';
+}
+
 List<Finding> checkApp(AppInfo app, {required int deviceSdk, DateTime? now}) {
   now ??= DateTime.now();
   final out = <Finding>[];
@@ -240,7 +248,7 @@ List<Finding> checkApp(AppInfo app, {required int deviceSdk, DateTime? now}) {
       out.add(Finding(
         id: 'AS-OLD',
         severity: Severity.low,
-        title: 'لم يُحدَّث منذ ${age.inDays ~/ 365} سنوات',
+        title: 'لم يُحدَّث منذ ${arabicYears(age.inDays ~/ 365)}',
         explanation: 'التطبيقات غير المحدَّثة لا تصلها إصلاحات الثغرات.',
         advice: 'حدّثه من المتجر أو ابحث عن بديل.',
       ));
