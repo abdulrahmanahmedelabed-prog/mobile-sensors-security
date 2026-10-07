@@ -37,8 +37,11 @@ void main() {
     }
 
     Future<void> show(Widget page, String name, {int ms = 1500}) async {
-      await tester.pumpWidget(SensorsLabApp(home: page));
+      // A new key gives a fresh Navigator, so pages pushed by an earlier
+      // step do not stay on top of this one.
+      await tester.pumpWidget(SensorsLabApp(key: UniqueKey(), home: page));
       await settle(ms);
+      expect(find.byWidget(page), findsOneWidget);
       await shot(name);
     }
 
@@ -54,6 +57,7 @@ void main() {
     await show(const CompanionApp(requireUnlock: false), '03_companion');
     await show(SensorDetailScreen(info: sensorById('pressure')), '04_guide_detail');
     await tester.scrollUntilVisible(find.text('أجهزة تدعم هذا الحساس'), 300, scrollable: find.byType(Scrollable).first);
+    await tester.drag(find.byType(Scrollable).first, const Offset(0, -250));
     await settle(800);
     await shot('05_phones_with_sensor');
     await show(const DevicesScreen(), '06_best_phones');
