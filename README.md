@@ -8,6 +8,8 @@
    - **فاحص التطبيقات**: تطبيق أندرويد يفحص تطبيقات جوالك المثبتة **من الجوال نفسه**، ويعطي كل تطبيق درجة أمان من 100.
    - **mvscan**: أداة للكمبيوتر تفحص الكود المصدري وملفات APK/IPA، والتطبيقات المثبتة عبر USB.
 
+🌐 **موقع المشروع:** https://abdulrahmanahmedelabed-prog.github.io/mobile-sensors-security/
+
 البرنامج مكتوب مع مراعاة الأمان (راجع [الأمان في تطبيق الحساسات](#الأمان-في-تطبيق-الحساسات))، ويُفحص كل
 تعديل عليه آليًا بأداة الثغرات نفسها قبل بنائه.
 
@@ -30,7 +32,19 @@
 | 🔬 **المختبر** | كل الحساسات في شبكة، مع علامة ✓/✗ لما هو موجود في جوالك. اضغط لتجرّب فورًا: قراءة حيّة، و**رسم بياني لآخر 10 ثوانٍ**، والأقل والأعلى، وإيقاف مؤقت |
 | 🧭 **رفيق** | التطبيق الشامل الذي يستخدم كل الحساسات (مقفل بالبصمة) |
 | 📖 **الدليل** | شرح كل حساس وفوائده وطريقة عمله، مع بحث |
-| 📱 **جوالي** | قائمة الحساسات الموجودة فعلًا في جوالك ومواصفاتها، وصفحة الخصوصية والأمان |
+| 📱 **جوالي** | حساسات جوالك ومواصفاتها، و**أفضل الأجهزة** (ترتيب الجوالات المشهورة بحسب أهم الحساسات مع درجة جوالك)، والخصوصية والأمان |
+
+وفي صفحة كل حساس في الدليل قسم **«أجهزة تدعم هذا الحساس»**. البيانات لـ22 جوالًا مشهورًا (سامسونج، وجوجل، وآبل،
+وشاومي، وهواوي، وأونر، وون بلس، وفيفو، وأوبو، وإنفينكس)، وتحقّقنا منها من GSMArena ومواقع الشركات في أكتوبر 2026.
+ما تختلف فيه المصادر يظهر «غير مؤكد» ولا يدخل في الدرجة. الملف: [`sensors_app/lib/data/devices.dart`](sensors_app/lib/data/devices.dart).
+
+### صور من التطبيقين
+
+تُلتقط آليًا من محاكي أندرويد بعد كل تعديل (فرع [`screenshots`](../../tree/screenshots)).
+
+| المختبر | تجربة حساس | «رفيق» | أجهزة تدعم الحساس | أفضل الأجهزة | فاحص التطبيقات |
+|---|---|---|---|---|---|
+| ![](https://raw.githubusercontent.com/abdulrahmanahmedelabed-prog/mobile-sensors-security/screenshots/sensors/01_lab.png) | ![](https://raw.githubusercontent.com/abdulrahmanahmedelabed-prog/mobile-sensors-security/screenshots/sensors/02_accelerometer.png) | ![](https://raw.githubusercontent.com/abdulrahmanahmedelabed-prog/mobile-sensors-security/screenshots/sensors/03_companion.png) | ![](https://raw.githubusercontent.com/abdulrahmanahmedelabed-prog/mobile-sensors-security/screenshots/sensors/05_phones_with_sensor.png) | ![](https://raw.githubusercontent.com/abdulrahmanahmedelabed-prog/mobile-sensors-security/screenshots/sensors/06_best_phones.png) | ![](https://raw.githubusercontent.com/abdulrahmanahmedelabed-prog/mobile-sensors-security/screenshots/scanner/01_apps.png) |
 
 ### مقارنة مع أشهر التطبيقات المشابهة
 
@@ -195,6 +209,7 @@ base64 -w0 release.jks   # انسخ الناتج
 ```
 sensors_app/                      تطبيق «حساسات الجوال» (Flutter، أندرويد)
   lib/data/catalog.dart           دليل الحساسات: الشرح والفوائد وأين تُستخدم
+  lib/data/devices.dart           مواصفات حساسات 22 جوالًا ودرجة كل جوال
   lib/screens/screens.dart        الأقسام الأربعة: المختبر، والدليل، وجوالي
   lib/demos/                      تطبيق بسيط لكل حساس
   lib/widgets/live_chart.dart     الرسم البياني الحي
@@ -208,4 +223,6 @@ app_scanner/                      تطبيق «فاحص التطبيقات» (Fl
   android/.../MainActivity.kt     قراءة معلومات التطبيقات المثبتة من أندرويد
 mobile_vuln_scanner/              أداة mvscan (Python)
 .github/workflows/ci.yml          اختبار، ثم فحص، ثم بناء، ثم فحص الـ APK، ثم نشره
+.github/workflows/site.yml        صور من محاكي أندرويد، ثم نشر موقع المشروع
+docs/site/index.html              موقع المشروع (GitHub Pages)
 ```

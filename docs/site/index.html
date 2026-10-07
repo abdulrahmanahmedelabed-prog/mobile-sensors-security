@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<title>حساسات الجوال والأمان</title>
+<meta name="description" content="تعلّم حساسات جوالك وجرّبها، واستخدمها كلها في تطبيق واحد، وافحص أمان تطبيقاتك. مجاني ومفتوح المصدر، بلا إنترنت وبلا إعلانات.">
+<style>
+:root {
+  --bg: #f6f8f7; --surface: #ffffff; --text: #14211d; --muted: #52645e; --line: #dde5e2;
+  --primary: #00796b; --primary-ink: #ffffff; --accent: #283593; --good: #2e7d32; --bad: #b3261e;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1513; --surface: #18201d; --text: #e6efec; --muted: #9db0aa; --line: #2a3632;
+    --primary: #4db6ac; --primary-ink: #0b1f1c; --accent: #9fa8da; --good: #81c784; --bad: #f28b82;
+  }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 17px/1.7 "Noto Naskh Arabic", "Segoe UI", Tahoma, system-ui, sans-serif; }
+a { color: var(--primary); }
+.wrap { max-width: 1080px; margin: 0 auto; padding: 0 16px; }
+header { padding: 56px 0 32px; text-align: center; }
+h1 { font-size: clamp(28px, 6vw, 44px); margin: 0 0 8px; line-height: 1.3; }
+h2 { font-size: 26px; margin: 48px 0 16px; }
+.lead { color: var(--muted); font-size: 19px; max-width: 720px; margin: 0 auto 24px; }
+.badges { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 24px; }
+.badge { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 4px 14px; font-size: 14px; color: var(--muted); }
+.cards { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 20px; }
+.card h3 { margin: 0 0 6px; font-size: 20px; }
+.card p { margin: 0 0 14px; color: var(--muted); }
+.btn { display: inline-block; text-decoration: none; background: var(--primary); color: var(--primary-ink); border-radius: 12px; padding: 10px 18px; font-weight: 700; margin: 4px 0 0 6px; }
+.btn.alt { background: transparent; color: var(--primary); border: 1px solid var(--primary); }
+.btn.scanner { background: var(--accent); color: #fff; }
+.shots { display: flex; gap: 12px; overflow-x: auto; padding: 4px 2px 12px; scroll-snap-type: x mandatory; }
+.shots figure { margin: 0; flex: 0 0 auto; width: 200px; scroll-snap-align: start; }
+.shots img { width: 100%; border-radius: 14px; border: 1px solid var(--line); display: block; background: var(--surface); aspect-ratio: 9 / 19.5; object-fit: cover; }
+.shots figcaption { text-align: center; font-size: 14px; color: var(--muted); }
+.table-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; }
+table { border-collapse: collapse; width: 100%; min-width: 720px; font-size: 15px; }
+th, td { padding: 10px 12px; border-bottom: 1px solid var(--line); text-align: start; vertical-align: top; }
+th { background: color-mix(in srgb, var(--primary) 10%, var(--surface)); }
+td.us { font-weight: 700; color: var(--good); }
+ul.checks { padding: 0; list-style: none; margin: 0; }
+ul.checks li { padding: 6px 0; border-bottom: 1px dashed var(--line); }
+ul.checks li::before { content: "✔"; color: var(--good); margin-inline-end: 8px; }
+footer { color: var(--muted); text-align: center; padding: 40px 0; font-size: 14px; }
+code { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 1px 6px; direction: ltr; unicode-bidi: embed; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>حساسات الجوال والأمان</h1>
+  <p class="lead">تعلّم ما في جوالك من حساسات وجرّب كل حساس، واستخدمها كلها معًا في تطبيق واحد، ثم افحص أمان تطبيقاتك المثبتة.</p>
+  <div class="badges">
+    <span class="badge">مفتوح المصدر</span><span class="badge">بلا إنترنت</span><span class="badge">بلا إعلانات</span>
+    <span class="badge">لا يجمع بياناتك</span><span class="badge">أندرويد 10 فأحدث</span>
+  </div>
+  <a class="btn" href="https://github.com/abdulrahmanahmedelabed-prog/mobile-sensors-security/releases/download/app-latest/sensors-lab-arm64.apk">تحميل «حساسات الجوال»</a>
+  <a class="btn scanner" href="https://github.com/abdulrahmanahmedelabed-prog/mobile-sensors-security/releases/download/app-latest/app-scanner-arm64.apk">تحميل «فاحص التطبيقات»</a>
+  <a class="btn alt" href="https://github.com/abdulrahmanahmedelabed-prog/mobile-sensors-security">الكود على GitHub</a>
+</header>
+
+<section class="cards">
+  <div class="card"><h3>🔬 المختبر والدليل</h3><p>16 حساسًا: ماذا يقيس كل حساس، وكيف يعمل، وفوائده، وأي الأجهزة تدعمه. جرّب كل حساس مع رسم بياني حيّ.</p></div>
+  <div class="card"><h3>🧭 «رفيق»</h3><p>تطبيق واحد يستخدم كل الحساسات: اتجاه القبلة، والمسبحة بالتلويح، ونشاطي اليومي، وبيئة القراءة، والميزان، والعدسة المكبّرة، مقفل ببصمتك.</p></div>
+  <div class="card"><h3>📱 أفضل الأجهزة</h3><p>ترتيب الجوالات المشهورة بحسب أهم الحساسات، مع درجة جوالك أنت، ولكل حساس قائمة الأجهزة التي تضمّه.</p></div>
+  <div class="card"><h3>🛡️ فاحص التطبيقات</h3><p>يعطي كل تطبيق في جوالك درجة أمان من 100: مصدر التثبيت، والتوقيع، والصلاحيات القوية، والأجزاء المكشوفة، والمفاتيح السرية المسرّبة في كوده.</p></div>
+</section>
+
+<h2>من داخل التطبيقين</h2>
+<div class="shots">
+  <figure><img src="screenshots/sensors/01_lab.png" alt="المختبر" loading="lazy"><figcaption>المختبر</figcaption></figure>
+  <figure><img src="screenshots/sensors/02_accelerometer.png" alt="تجربة مقياس التسارع مع رسم بياني" loading="lazy"><figcaption>تجربة حساس</figcaption></figure>
+  <figure><img src="screenshots/sensors/03_companion.png" alt="رفيق" loading="lazy"><figcaption>«رفيق»</figcaption></figure>
+  <figure><img src="screenshots/sensors/05_phones_with_sensor.png" alt="الأجهزة التي تدعم الحساس" loading="lazy"><figcaption>أجهزة تدعم الحساس</figcaption></figure>
+  <figure><img src="screenshots/sensors/06_best_phones.png" alt="أفضل الأجهزة" loading="lazy"><figcaption>أفضل الأجهزة</figcaption></figure>
+  <figure><img src="screenshots/scanner/01_apps.png" alt="فاحص التطبيقات" loading="lazy"><figcaption>فاحص التطبيقات</figcaption></figure>
+  <figure><img src="screenshots/scanner/02_app_detail.png" alt="تفاصيل تطبيق" loading="lazy"><figcaption>تقرير تطبيق</figcaption></figure>
+</div>
+
+<h2>مقارنة مع أشهر التطبيقات المشابهة</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th></th><th>phyphox</th><th>Physics Toolbox</th><th>Sensors Multitool / DevCheck</th><th>تطبيقات القبلة المشهورة</th><th>حساسات الجوال</th></tr></thead>
+  <tbody>
+    <tr><td>رسم بياني حيّ مع الأقل والأعلى</td><td>✅</td><td>✅</td><td>✅</td><td>—</td><td class="us">✅</td></tr>
+    <tr><td>واجهة عربية مصمّمة من البداية</td><td>❌</td><td>❌</td><td>❌</td><td>✅</td><td class="us">✅</td></tr>
+    <tr><td>شرح فوائد كل حساس وطريقة عمله</td><td>جزئيًا</td><td>❌</td><td>❌</td><td>—</td><td class="us">✅</td></tr>
+    <tr><td>الأجهزة التي تدعم كل حساس، وترتيب أفضلها</td><td>❌</td><td>❌</td><td>جهازك فقط</td><td>❌</td><td class="us">✅</td></tr>
+    <tr><td>أدوات عملية (قبلة، مسبحة، عدسة…)</td><td>❌</td><td>❌</td><td>❌</td><td>القبلة فقط</td><td class="us">✅</td></tr>
+    <tr><td>بلا إعلانات وبلا جمع بيانات وبلا إذن إنترنت</td><td>بلا إعلانات</td><td>❌</td><td>❌</td><td>❌ غالبًا</td><td class="us">✅</td></tr>
+    <tr><td>فاحص أمني لتطبيقات الجوال</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td class="us">✅</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2>الأمان والخصوصية</h2>
+<div class="card">
+<ul class="checks">
+  <li>التطبيقان لا يملكان إذن الإنترنت أصلًا، فلا يمكن أن تخرج أي قراءة من جوالك.</li>
+  <li>لا يُحفظ شيء: لا قراءات ولا صور ولا صوت. الميكروفون يقيس شدة الصوت فقط.</li>
+  <li>الأذونات تُطلب عند فتح الميزة فقط مع شرح السبب، و«فاحص التطبيقات» بلا أي إذن.</li>
+  <li>كل الحساسات تتوقف فور خروجك من التطبيق.</li>
+  <li>كل تعديل يُفحص آليًا بأداة <code>mvscan</code> (الكود وملف APK الناتج) قبل نشره.</li>
+</ul>
+</div>
+
+<h2>للمطوّرين: mvscan</h2>
+<div class="card">
+  <p>أداة Python بلا مكتبات خارجية تفحص مشاريع أندرويد وiOS وFlutter وReact Native، وملفات APK وIPA، والتطبيقات المثبتة عبر USB. فيها أكثر من 55 قاعدة، وتصدر تقارير نصية وJSON وHTML وSARIF.</p>
+  <p><code>python3 -m mvscan app.apk --format html -o report.html</code></p>
+  <a class="btn alt" href="https://github.com/abdulrahmanahmedelabed-prog/mobile-sensors-security/tree/main/mobile_vuln_scanner">دليل mvscan</a>
+</div>
+
+<footer>
+  مفتوح المصدر برخصة MIT ·
+  <a href="https://github.com/abdulrahmanahmedelabed-prog/mobile-sensors-security/security/policy">الإبلاغ عن ثغرة</a>
+</footer>
+</div>
+</body>
+</html>

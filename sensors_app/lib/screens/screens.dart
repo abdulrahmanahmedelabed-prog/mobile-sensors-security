@@ -4,6 +4,7 @@ import '../companion/companion_app.dart';
 import '../data/catalog.dart';
 import '../platform/device.dart';
 import '../widgets/common.dart';
+import 'devices_screen.dart';
 
 /// The app's four parts, kept apart as in phyphox or Physics Toolbox:
 /// try sensors (المختبر), use them (رفيق), learn (الدليل), inspect the phone (جوالي).
@@ -141,20 +142,26 @@ class _LabScreenState extends State<LabScreen> {
   }
 }
 
-/// The phone's own sensors and the app's privacy promises.
+/// The phone's own sensors, how phones compare, and the app's privacy promises.
 class PhoneScreen extends StatelessWidget {
   const PhoneScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 2,
+      length: 3,
       child: Scaffold(
         appBar: AppBar(
           title: const Text('جوالي'),
-          bottom: const TabBar(tabs: [Tab(text: 'حساسات جوالي'), Tab(text: 'الخصوصية والأمان')]),
+          bottom: const TabBar(
+            tabs: [Tab(text: 'حساسات جوالي'), Tab(text: 'أفضل الأجهزة'), Tab(text: 'الخصوصية والأمان')],
+          ),
         ),
-        body: const TabBarView(children: [MySensorsScreen(embedded: true), SecurityScreen(embedded: true)]),
+        body: const TabBarView(children: [
+          MySensorsScreen(embedded: true),
+          DevicesScreen(embedded: true),
+          SecurityScreen(embedded: true),
+        ]),
       ),
     );
   }
@@ -255,6 +262,7 @@ class SensorDetailScreen extends StatelessWidget {
         ])),
         section('أمثلة من تطبيقات معروفة', Text(info.examples.join('، '))),
         section('الإذن المطلوب', Text(info.permission == null ? 'لا يحتاج إذنًا' : 'إذن «${info.permission}» — يُطلب عند فتح التجربة فقط')),
+        section('أجهزة تدعم هذا الحساس', SupportingPhones(info: info)),
         section('أين يُستخدم في «رفيق»؟', Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           for (final MapEntry(key: f, value: what) in info.usedIn.entries) Text('• $f: $what'),
         ])),

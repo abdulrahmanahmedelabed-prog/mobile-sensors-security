@@ -13,7 +13,9 @@ void main() {
 }
 
 class SensorsLabApp extends StatelessWidget {
-  const SensorsLabApp({super.key});
+  const SensorsLabApp({super.key, this.home = const HomeScreen()});
+  /// The first screen; screenshots and tests open a specific one.
+  final Widget home;
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +31,7 @@ class SensorsLabApp extends StatelessWidget {
         themeMode: mode,
         theme: ThemeData(colorSchemeSeed: seed, useMaterial3: true),
         darkTheme: ThemeData(colorSchemeSeed: seed, brightness: Brightness.dark, useMaterial3: true),
-        home: const HomeScreen(),
+        home: home,
       ),
     );
   }

@@ -1,0 +1,106 @@
+name: Screenshots and site
+
+# Runs both apps on an Android emulator, screenshots their main screens,
+# keeps the screenshots on the "screenshots" branch (shown in the README),
+# and publishes the project site (docs/site) to GitHub Pages with them.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "sensors_app/**"
+      - "app_scanner/**"
+      - "docs/site/**"
+      - ".github/workflows/site.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: site
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  screenshots:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: write  # pushes the screenshots branch
+    steps:
+      - uses: actions/checkout@v4
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: flutter pub get
+        working-directory: sensors_app
+      - run: flutter pub get
+        working-directory: app_scanner
+      - uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          arch: x86_64
+          target: google_apis
+          profile: pixel_7
+          cores: 4
+          emulator-options: -no-window -gpu swiftshader_indirect -no-boot-anim -noaudio -camera-back none
+          disable-animations: true
+          script: |
+            adb shell settings put system system_locales ar-SA || true
+            cd sensors_app && flutter drive --driver=test_driver/integration_test.dart --target=integration_test/screenshots_test.dart -d emulator-5554 2>&1 | tee ../sensors.log; cd ..
+            cd app_scanner && flutter drive --driver=test_driver/integration_test.dart --target=integration_test/screenshots_test.dart -d emulator-5554 2>&1 | tee ../scanner.log; cd ..
+      - name: Collect screenshots
+        if: always()
+        run: |
+          mkdir -p shots/sensors shots/scanner
+          cp sensors_app/screenshots/*.png shots/sensors/ 2>/dev/null || true
+          cp app_scanner/screenshots/*.png shots/scanner/ 2>/dev/null || true
+          ls -R shots
+          grep -q "All tests passed" sensors.log
+          grep -q "All tests passed" scanner.log
+      # Kept on their own branch so main is not rewritten by CI.
+      - name: Publish to the screenshots branch
+        working-directory: shots
+        run: |
+          git init -q
+          git checkout -q -b screenshots
+          git add .
+          git -c user.name="github-actions" -c user.email="github-actions@users.noreply.github.com" \
+            commit -qm "Screenshots for ${GITHUB_SHA}"
+          git push -qf "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git" screenshots
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: screenshots
+          path: shots/
+
+  pages:
+    needs: screenshots
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: screenshots
+          path: docs/site/screenshots
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/site
+      - id: deploy
+        uses: actions/deploy-pages@v4
